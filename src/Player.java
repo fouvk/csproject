@@ -1,11 +1,7 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import javax.swing.*;
 
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
 public class Player extends Circle{
     private boolean upPressed, downPressed, leftPressed, rightPressed;
     private double speed = 0.4;
