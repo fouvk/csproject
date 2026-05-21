@@ -3,6 +3,12 @@ import javax.swing.Timer;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Game extends JFrame {
@@ -11,10 +17,13 @@ public class Game extends JFrame {
     protected static boolean state = true;
 
     private int totalEnemiesSpawned = 0;
-    private int spawnDelay;
+    private int spawnDelay = 500;
     private final int INITIAL_DELAY = 500;
     private final int MIN_DELAY = 10;
     private final double DIFFICULTY_RAMP = 0.01;
+
+    private int score;
+    private JLabel scoreText;
 
     private final int TICK = 10;
 
@@ -22,7 +31,17 @@ public class Game extends JFrame {
     private Player player;
     private GameCanvas canvas;
 
-    public Game() {    
+    private String currentUsername;
+    private boolean scoreSaved = false;
+
+    private Timer gameLoop;
+    private Timer spawnLoop;
+
+    public Game(String username) {   
+        state = true;
+        scoreSaved = false;
+        currentUsername = username; 
+        setTitle("Void Invasion - " + currentUsername);
         setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -30,39 +49,44 @@ public class Game extends JFrame {
         canvas = new GameCanvas();
         player = new Player(canvas);
         enemies = new ArrayList<Enemy>();
-        
+        scoreText = new JLabel();
+
+        score = 0;
+        scoreText.setForeground(Color.GRAY);
+        scoreText.setFont(new Font("Monospaced", Font.BOLD, width/15));
+
         add(canvas);
+        canvas.add(scoreText);
         setVisible(true);
         
-        Timer gameLoop = new Timer(TICK, new ActionListener() {
+        gameLoop = new Timer(TICK, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
                 if (state) {
                     onUpdate();
                     canvas.repaint();
+                } else if (!scoreSaved) {
+                    gameOver();
                 }
             }
         });
 
-        final Timer spawnLoop = new Timer(spawnDelay, null);
+        spawnLoop = new Timer(spawnDelay, null);
     
         spawnLoop.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
                 if (state) {
-                    // 1. Spawn the enemy
                     Enemy e = new Enemy();
                     enemies.add(e);
                     totalEnemiesSpawned++;
 
-                    // 2. Use an asymptotic formula based on total enemies spawned instead of time.
-                    // This makes it 100% stable and prevents historical timing catch-up bugs.
                     spawnDelay = (int) (MIN_DELAY + (INITIAL_DELAY - MIN_DELAY) / (1 + DIFFICULTY_RAMP * totalEnemiesSpawned));
 
-                    // 3. Set the delay safely for the *next* spawn interval
                     spawnLoop.setDelay(spawnDelay);
-                    
-                    System.out.println("Enemies Spawned: " + totalEnemiesSpawned + " | Next Spawn In: " + spawnDelay + "ms");
+
+                    score += 1;
+                    scoreText.setText(Integer.toString(score));
                 }
             }
         });
@@ -71,8 +95,7 @@ public class Game extends JFrame {
     }
 
     public static void main(String[] args) throws Exception {
-        System.setProperty("sun.java2d.uiScale", "2.0");
-        SwingUtilities.invokeLater(() -> new Game());
+        SwingUtilities.invokeLater(() -> new LoginWindow());
     }
 
     void onUpdate() {
@@ -107,6 +130,58 @@ public class Game extends JFrame {
         }
     }
     
+    private void gameOver() {
+        scoreSaved = true;
+
+        if (gameLoop != null) gameLoop.stop();
+        if (spawnLoop != null) spawnLoop.stop();
+
+        File file = new File("highscores.txt");
+        Map<String, Integer> highScores = new HashMap<>();
+
+        if (file.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 2) {
+                        highScores.put(parts[0], Integer.parseInt(parts[1]));
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int existingBest = highScores.getOrDefault(currentUsername, 0);
+        if (score > existingBest) {
+            highScores.put(currentUsername, score);
+        }
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+            for (Map.Entry<String, Integer> entry : highScores.entrySet()) {
+                writer.println(entry.getKey() + ":" + entry.getValue());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        java.util.List<Map.Entry<String, Integer>> list = new ArrayList<>(highScores.entrySet());
+        list.sort((a, b) -> b.getValue().compareTo(a.getValue())); // Sort descending
+
+        StringBuilder leaderboard = new StringBuilder("LEADERBOARD\n\n");
+        int rank = 1;
+        for (Map.Entry<String, Integer> entry : list) {
+            leaderboard.append(rank).append(". ").append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
+            if (++rank > 5) break; 
+        }
+
+        JOptionPane.showMessageDialog(this, "GAME OVER, " + currentUsername + "!\nScore: " + score + "\n\n" + leaderboard.toString());
+        
+        dispose();
+        new LoginWindow();
+    }
 
     private class GameCanvas extends JPanel {
         public GameCanvas() {

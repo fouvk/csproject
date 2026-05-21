@@ -17,14 +17,22 @@ public class Player extends Circle{
 
     @Override
     public void update() {
-        if (upPressed) vy -= speed;
-        if (downPressed) vy += speed;
-        if (leftPressed) vx -= speed;
-        if (rightPressed) vx += speed;
+        if ((leftPressed || rightPressed) && (upPressed || downPressed)) { //if moving diagonally, 
+            if (upPressed) vy -= speed * 0.70710678118;
+            if (downPressed) vy += speed * 0.70710678118;
+            if (leftPressed) vx -= speed * 0.70710678118;
+            if (rightPressed) vx += speed * 0.70710678118;
+        } 
+        else {
+            if (upPressed) vy -= speed;
+            if (downPressed) vy += speed;
+            if (leftPressed) vx -= speed;
+            if (rightPressed) vx += speed;
+        }
 
         x+=vx;
         y+=vy;
-        
+                
         vx*=0.9;
         vy*=0.9;
     }
