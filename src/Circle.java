@@ -9,7 +9,7 @@ public abstract class Circle {
     protected double radius;
     protected Color color;
 
-    private final Ellipse2D.Double ellipse = new Ellipse2D.Double();
+    private final Ellipse2D.Double ellipse = new Ellipse2D.Double(); //reusing a single ellipse object instead of making one every frame
 
     public abstract void update();
 

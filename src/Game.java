@@ -17,7 +17,8 @@ public class Game extends JFrame {
     protected static boolean state = true;
 
     private int totalEnemiesSpawned = 0;
-    private int spawnDelay = 500;
+
+    private int spawnDelay;
     private final int INITIAL_DELAY = 500;
     private final int MIN_DELAY = 10;
     private final double DIFFICULTY_RAMP = 0.01;
@@ -41,6 +42,7 @@ public class Game extends JFrame {
         state = true;
         scoreSaved = false;
         currentUsername = username; 
+        spawnDelay = INITIAL_DELAY;
         setTitle("Void Invasion - " + currentUsername);
         setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -139,7 +141,8 @@ public class Game extends JFrame {
         File file = new File("highscores.txt");
         Map<String, Integer> highScores = new HashMap<>();
 
-        if (file.exists()) {
+
+        if (file.exists()) { //read scores from file into map
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -148,49 +151,54 @@ public class Game extends JFrame {
                         highScores.put(parts[0], Integer.parseInt(parts[1]));
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException e) {}
         }
+
 
         int existingBest = highScores.getOrDefault(currentUsername, 0);
         if (score > existingBest) {
-            highScores.put(currentUsername, score);
+            highScores.put(currentUsername, score); //only update if beating the same players previous best
         }
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) { //write scores back into file
             for (Map.Entry<String, Integer> entry : highScores.entrySet()) {
                 writer.println(entry.getKey() + ":" + entry.getValue());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) {}
 
-
+        //sorts scores descending
         java.util.List<Map.Entry<String, Integer>> list = new ArrayList<>(highScores.entrySet());
-        list.sort((a, b) -> b.getValue().compareTo(a.getValue())); // Sort descending
+        list.sort((a, b) -> b.getValue().compareTo(a.getValue()));
 
         StringBuilder leaderboard = new StringBuilder("LEADERBOARD\n\n");
         int rank = 1;
         for (Map.Entry<String, Integer> entry : list) {
             leaderboard.append(rank).append(". ").append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
-            if (++rank > 5) break; 
+            if (rank++ > 5) break; 
         }
 
-        JOptionPane.showMessageDialog(this, "GAME OVER, " + currentUsername + "!\nScore: " + score + "\n\n" + leaderboard.toString());
+        JOptionPane.showMessageDialog(this,
+            "<html><body style='font-size:30px;'>" //need html for font sizing
+            + "GAME OVER, " + currentUsername + "!<br>"
+            + "Score: " + score + "<br><br>"
+            + leaderboard.toString().replace("\n", "<br>") //replacing newline indicators to html
+            + "</body></html>"
+        );
         
+        //close game window and return to login
         dispose();
         new LoginWindow();
     }
 
-    private class GameCanvas extends JPanel {
+    private class GameCanvas extends JPanel { //inner private class to have access to player and enemies list
         public GameCanvas() {
             setBackground(Color.WHITE);
             setOpaque(true);
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
+        protected void paintComponent(Graphics g) { //called by swing every repaint()
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
 
@@ -204,7 +212,7 @@ public class Game extends JFrame {
                 e.draw(g2d);
             }
 
-            Toolkit.getDefaultToolkit().sync();
+            Toolkit.getDefaultToolkit().sync(); //flushes display buffer reducing tearing 
         }
     }
 }

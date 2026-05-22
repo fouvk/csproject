@@ -4,6 +4,7 @@ import javax.swing.*;
 
 public class Player extends Circle{
     private boolean upPressed, downPressed, leftPressed, rightPressed;
+
     private double speed = 0.4;
 
     public Player(JComponent canvas){
@@ -17,7 +18,7 @@ public class Player extends Circle{
 
     @Override
     public void update() {
-        if ((leftPressed || rightPressed) && (upPressed || downPressed)) { //if moving diagonally, 
+        if ((leftPressed || rightPressed) && (upPressed || downPressed)) { //if moving diagonally
             if (upPressed) vy -= speed * 0.70710678118;
             if (downPressed) vy += speed * 0.70710678118;
             if (leftPressed) vx -= speed * 0.70710678118;
@@ -37,10 +38,11 @@ public class Player extends Circle{
         vy*=0.9;
     }
 
-    public void setupKeyBindings(JComponent canvas) {
+    public void setupKeyBindings(JComponent canvas) { //uses inputmap and actionmap instead of keylistener to track both pressing and releasing actions, more smooth and functional
         InputMap inputmap = canvas.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionmap = canvas.getActionMap();
 
+        //up
         inputmap.put(KeyStroke.getKeyStroke("UP"), "pressUp");
         inputmap.put(KeyStroke.getKeyStroke("released UP"), "releaseUp");
         
@@ -53,6 +55,7 @@ public class Player extends Circle{
             public void actionPerformed(ActionEvent e) { upPressed = false; }
         });
 
+        //down
         inputmap.put(KeyStroke.getKeyStroke("DOWN"), "pressDown");
         inputmap.put(KeyStroke.getKeyStroke("released DOWN"), "releaseDown");
         
@@ -65,6 +68,7 @@ public class Player extends Circle{
             public void actionPerformed(ActionEvent e) { downPressed = false; }
         });
 
+        //left
         inputmap.put(KeyStroke.getKeyStroke("LEFT"), "pressLeft");
         inputmap.put(KeyStroke.getKeyStroke("released LEFT"), "releaseLeft");
         
@@ -77,6 +81,7 @@ public class Player extends Circle{
             public void actionPerformed(ActionEvent e) { leftPressed = false; }
         });
 
+        //right
         inputmap.put(KeyStroke.getKeyStroke("RIGHT"), "pressRight");
         inputmap.put(KeyStroke.getKeyStroke("released RIGHT"), "releaseRight");
         
