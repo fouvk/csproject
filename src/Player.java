@@ -45,6 +45,8 @@ public class Player extends Circle{
         //up
         inputmap.put(KeyStroke.getKeyStroke("UP"), "pressUp");
         inputmap.put(KeyStroke.getKeyStroke("released UP"), "releaseUp");
+        inputmap.put(KeyStroke.getKeyStroke("W"), "pressUp");
+        inputmap.put(KeyStroke.getKeyStroke("released W"), "releaseUp");
         
         actionmap.put("pressUp", new AbstractAction() {
             @Override
@@ -58,6 +60,8 @@ public class Player extends Circle{
         //down
         inputmap.put(KeyStroke.getKeyStroke("DOWN"), "pressDown");
         inputmap.put(KeyStroke.getKeyStroke("released DOWN"), "releaseDown");
+        inputmap.put(KeyStroke.getKeyStroke("S"), "pressDown");
+        inputmap.put(KeyStroke.getKeyStroke("released S"), "releaseDown");
         
         actionmap.put("pressDown", new AbstractAction() {
             @Override
@@ -71,6 +75,8 @@ public class Player extends Circle{
         //left
         inputmap.put(KeyStroke.getKeyStroke("LEFT"), "pressLeft");
         inputmap.put(KeyStroke.getKeyStroke("released LEFT"), "releaseLeft");
+        inputmap.put(KeyStroke.getKeyStroke("A"), "pressLeft");
+        inputmap.put(KeyStroke.getKeyStroke("released A"), "releaseLeft");
         
         actionmap.put("pressLeft", new AbstractAction() {
             @Override
@@ -84,6 +90,8 @@ public class Player extends Circle{
         //right
         inputmap.put(KeyStroke.getKeyStroke("RIGHT"), "pressRight");
         inputmap.put(KeyStroke.getKeyStroke("released RIGHT"), "releaseRight");
+        inputmap.put(KeyStroke.getKeyStroke("D"), "pressRight");
+        inputmap.put(KeyStroke.getKeyStroke("released D"), "releaseRight");
         
         actionmap.put("pressRight", new AbstractAction() {
             @Override
