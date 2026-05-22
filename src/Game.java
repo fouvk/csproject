@@ -175,7 +175,7 @@ public class Game extends JFrame {
         int rank = 1;
         for (Map.Entry<String, Integer> entry : list) {
             leaderboard.append(rank).append(". ").append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
-            if (rank++ > 5) break; 
+            if (++rank > 5) break; 
         }
 
         JOptionPane.showMessageDialog(this,
